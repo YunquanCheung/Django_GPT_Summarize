@@ -68,4 +68,6 @@ sudo systemctl start nginx
    - URL: `54.224.192.53/summarize/`
 
 ### Note
-The request data must have a key named "text", and the data cannot be empty. The request method can only be POST. The request data size must not exceed the limit set by the admin, and the maximum limit cannot be 1000.
+The request data must have a key named "text", and the data cannot be empty. The request method can only be POST. 
+The request data size must not exceed the limit set by the admin (5000).
+The Greenwich Mean Time (GMT) / Coordinated Universal Time (UTC) +4 is used in the timestamp.
