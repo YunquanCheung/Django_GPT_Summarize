@@ -16,9 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from gptapi.views import GPT_API
+from django.urls import re_path
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
-    path("summarize/",GPT_API.as_view())
+    re_path(r'^summarize/?$', GPT_API.as_view())
 ]
-
