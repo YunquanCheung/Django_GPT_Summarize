@@ -16,31 +16,41 @@ def text_leng(text):
         leng_status = False
     return leng_status
 class GPT_API(View):
-    def get(self,request):
+    def post(self, request):
         results = {"code": 404, "status": "handle error"}
-        return JsonResponse(results)
-
-    def post(self,request):
-        results = {"code": 404, "status": "handle error"}
+        
         try:
             input_text = request.POST.get("text")
-            if text_leng(input_text):
-                openai.api_key = GPT_KEY
-                message_histoty = []
-                message_histoty.append({"role": "user", "content": input_text})
-                completion = openai.ChatCompletion.create(
-                    # model="gpt-3.5-turbo",
-                    model=GPT_MODELS,
-                    messages=message_histoty,
-                )
-                reply_content = completion.choices[0].message.content
-                print("Answers: " + reply_content)
-                message_histoty.append({"role": "assistant", "content": reply_content})
-                SUMMARIZES.objects.create(input_text=input_text,summary=reply_content)
-                results = {"code": 200, "status": "success", "summary": reply_content}
-            else:
-                results["error"] = "There is an error in the text length!"
+            
+            if not input_text:
+                raise ValueError("Text is missing!")
+                
+            if not text_leng(input_text):
+                raise ValueError("There is an error in the text length!")
+            
+            reply_content = get_openai_reply(input_text)
+            
+            store_in_database(input_text, reply_content)
+            
+            results = {"code": 200, "status": "success", "summary": reply_content}
+        
         except Exception as e:
             results["error"] = str(e)
+    
         return JsonResponse(results)
+    
+    def get_openai_reply(input_text):
+        openai.api_key = GPT_KEY
+        input_text = "Write a concise and comprehensive summary of [" + input_text + "]"
+        message_history = [{"role": "user", "content": input_text}]
+        
+        completion = openai.ChatCompletion.create(
+            model=GPT_MODELS,
+            messages=message_history,
+        )
+        
+        return completion.choices[0].message.content
+    
+    def store_in_database(input_text, reply_content):
+        SUMMARIZES.objects.create(input_text=input_text, summary=reply_content)
 
